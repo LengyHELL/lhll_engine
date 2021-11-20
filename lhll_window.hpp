@@ -1,7 +1,7 @@
 #ifndef LHLL_WINDOW_HPP
 #define LHLL_WINDOW_HPP
 
-#define GLFW_INCLUED_VULKAN
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 #include <string>
@@ -16,6 +16,8 @@ namespace lhll {
     LhllWindow &operator=(const LhllWindow&) = delete;
 
     bool shouldClose() { return glfwWindowShouldClose(window); }
+
+    void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
 
   private:
     void initWindow();

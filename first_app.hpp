@@ -3,6 +3,7 @@
 
 #include "lhll_window.hpp"
 #include "lhll_pipeline.hpp"
+#include "lhll_device.hpp"
 
 namespace lhll {
   class FirstApp {
@@ -13,7 +14,8 @@ namespace lhll {
     void run();
   private:
     LhllWindow lhllWindow{WIDTH, HEIGHT, "Hello Vulkan!"};
-    LhllPipeline lhllPipeline{"shaders/simple_shader.vert.spv", "shaders/simple_shader.frag.spv"};
+    LhllDevice lhllDevice{lhllWindow};
+    LhllPipeline lhllPipeline{lhllDevice, "shaders/simple_shader.vert.spv", "shaders/simple_shader.frag.spv", LhllPipeline::defaultPipelineConfigInfo(WIDTH, HEIGHT)};
   };
 }
 
