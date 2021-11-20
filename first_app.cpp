@@ -25,12 +25,37 @@ namespace lhll {
     vkDeviceWaitIdle(lhllDevice.device());
   }
 
+  void lot_triangles(std::vector<LhllModel::Vertex>& vertices, const int& iter = 1) {
+    for (int it = 0; it < iter; it++) {
+      std::vector<LhllModel::Vertex> temp;
+      int size = vertices.size();
+      for (int i = 0; i < size; i++) {
+        temp.push_back(vertices[i]);
+        int start = int(i / 3) * 3;
+        for (int j = start; j < start + 3; j++) {
+          if (i != j) {
+            glm::vec2 a = vertices[i].position;
+            glm::vec2 b = vertices[j].position;
+            b -= a;
+            float len = glm::length(b);
+            b = glm::normalize(b);
+            b = a + (b * (len / 2));
+            temp.push_back({{b.x, b.y}});
+          }
+        }
+      }
+      vertices = temp;
+    }
+  }
+
   void FirstApp::loadModels() {
     std::vector<LhllModel::Vertex> vertices {
-      {{  0.0f, -0.5f}},
-      {{  0.5f,  0.5f}},
-      {{ -0.5f,  0.5f}}
+      {{  0.0f, -1.0f}},
+      {{  1.0f,  1.0f}},
+      {{ -1.0f,  1.0f}}
     };
+
+    lot_triangles(vertices, 7);
 
     lhllModel = std::make_unique<LhllModel>(lhllDevice, vertices);
   }
