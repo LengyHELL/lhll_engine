@@ -1,5 +1,5 @@
-#ifndef LHLL_WINDOW_H
-#define LHLL_WINDOW_H
+#ifndef LHLL_WINDOW_HPP
+#define LHLL_WINDOW_HPP
 
 #define GLFW_INCLUED_VULKAN
 #include <GLFW/glfw3.h>
