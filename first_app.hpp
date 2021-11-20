@@ -1,10 +1,11 @@
 #ifndef FIRST_APP_HPP
 #define FIRST_APP_HPP
 
-#include "lhll_window.hpp"
+#include "lhll_device.hpp"
 #include "lhll_pipeline.hpp"
 #include "lhll_swap_chain.hpp"
-#include "lhll_device.hpp"
+#include "lhll_window.hpp"
+#include "lhll_model.hpp"
 
 #include <stdexcept>
 #include <memory>
@@ -24,6 +25,7 @@ namespace lhll {
 
     void run();
   private:
+    void loadModels();
     void createPipelineLayout();
     void createPipeline();
     void createCommandBuffers();
@@ -35,6 +37,7 @@ namespace lhll {
     std::unique_ptr<LhllPipeline> lhllPipeline;
     VkPipelineLayout pipelineLayout;
     std::vector<VkCommandBuffer> commandBuffers;
+    std::unique_ptr<LhllModel> lhllModel;
   };
 }
 

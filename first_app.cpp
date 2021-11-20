@@ -5,6 +5,7 @@
 namespace lhll {
 
   FirstApp::FirstApp() {
+    loadModels();
     createPipelineLayout();
     createPipeline();
     createCommandBuffers();
@@ -22,6 +23,16 @@ namespace lhll {
     }
 
     vkDeviceWaitIdle(lhllDevice.device());
+  }
+
+  void FirstApp::loadModels() {
+    std::vector<LhllModel::Vertex> vertices {
+      {{  0.0f, -0.5f}},
+      {{  0.5f,  0.5f}},
+      {{ -0.5f,  0.5f}}
+    };
+
+    lhllModel = std::make_unique<LhllModel>(lhllDevice, vertices);
   }
 
   void FirstApp::createPipelineLayout() {
@@ -82,7 +93,8 @@ namespace lhll {
       vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
       lhllPipeline->bind(commandBuffers[i]);
-      vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+      lhllModel->bind(commandBuffers[i]);
+      lhllModel->draw(commandBuffers[i]);
 
       vkCmdEndRenderPass(commandBuffers[i]);
       if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
