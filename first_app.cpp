@@ -40,7 +40,7 @@ namespace lhll {
             float len = glm::length(b);
             b = glm::normalize(b);
             b = a + (b * (len / 2));
-            temp.push_back({{b.x, b.y}});
+            temp.push_back({{b.x, b.y}, vertices[j].color});
           }
         }
       }
@@ -50,9 +50,9 @@ namespace lhll {
 
   void FirstApp::loadModels() {
     std::vector<LhllModel::Vertex> vertices {
-      {{  0.0f, -1.0f}},
-      {{  1.0f,  1.0f}},
-      {{ -1.0f,  1.0f}}
+      {{  0.0f, -1.0f}, {1.0f, 0.0f, 0.0f}},
+      {{  1.0f,  1.0f}, {0.0f, 1.0f, 0.0f}},
+      {{ -1.0f,  1.0f}, {0.0f, 0.0f, 1.0f}}
     };
 
     lot_triangles(vertices, 7);
