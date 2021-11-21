@@ -1,5 +1,6 @@
 #include "first_app.hpp"
 
+#include "lhll_camera.hpp"
 #include "simple_render_system.hpp"
 
 #define GLM_FORCE_RADIANS
@@ -18,16 +19,20 @@ namespace lhll {
 
   void FirstApp::run() {
     SimpleRenderSystem simpleRenderSystem{lhllDevice, lhllRenderer.getSwapChainRenderPass()};
+    LhllCamera camera{};
 
     while (!lhllWindow.shouldClose()) {
       glfwPollEvents();
+      float aspect = lhllRenderer.getAspectRatio();
+      //camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
+      camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
 
       if (auto commandBuffer = lhllRenderer.beginFrame()) {
         // update systems
 
         // render system
         lhllRenderer.beginSwapChainRenderPass(commandBuffer);
-        simpleRenderSystem.renderGameObjects(commandBuffer, gameObjects);
+        simpleRenderSystem.renderGameObjects(commandBuffer, gameObjects, camera);
         lhllRenderer.endSwapChainRenderPass(commandBuffer);
         lhllRenderer.endFrame();
       }
@@ -99,7 +104,7 @@ namespace lhll {
 
     auto cube = LhllGameObject::createGameObject();
     cube.model = lhllModel;
-    cube.transform.translation = {0.0f, 0.0f, 0.5f};
+    cube.transform.translation = {0.0f, 0.0f, 2.5f};
     cube.transform.scale = {0.5f, 0.5f, 0.5f};
 
     gameObjects.push_back(std::move(cube));

@@ -19,6 +19,7 @@ namespace lhll {
     LhllRenderer& operator=(const LhllRenderer&) = delete;
 
     VkRenderPass getSwapChainRenderPass() const { return lhllSwapChain->getRenderPass(); }
+    float getAspectRatio() const { return lhllSwapChain->extentAspectRatio(); }
     bool isFrameInProgress() const { return isFrameStarted; }
 
     VkCommandBuffer getCurrentCommandBuffer() const {

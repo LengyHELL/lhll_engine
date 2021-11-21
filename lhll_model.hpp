@@ -1,5 +1,5 @@
-#ifndef GUARD
-#define GUARD
+#ifndef LHLL_MODEL_HPP
+#define LHLL_MODEL_HPP
 
 #include "lhll_device.hpp"
 

@@ -1,6 +1,7 @@
 #ifndef SIMPLE_RENDER_SYSTEM_HPP
 #define SIMPLE_RENDER_SYSTEM_HPP
 
+#include "lhll_camera.hpp"
 #include "lhll_device.hpp"
 #include "lhll_game_object.hpp"
 #include "lhll_pipeline.hpp"
@@ -17,7 +18,7 @@ namespace lhll {
     SimpleRenderSystem(const SimpleRenderSystem&) = delete;
     SimpleRenderSystem& operator=(const SimpleRenderSystem&) = delete;
 
-    void renderGameObjects(VkCommandBuffer commandBuffer, std::vector<LhllGameObject>& gameObjects);
+    void renderGameObjects(VkCommandBuffer commandBuffer, std::vector<LhllGameObject>& gameObjects, const LhllCamera& camera);
 
   private:
     void createPipelineLayout();
