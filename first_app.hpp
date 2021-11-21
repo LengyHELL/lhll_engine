@@ -3,7 +3,6 @@
 
 #include "lhll_device.hpp"
 #include "lhll_game_object.hpp"
-#include "lhll_pipeline.hpp"
 #include "lhll_window.hpp"
 #include "lhll_renderer.hpp"
 
@@ -25,16 +24,11 @@ namespace lhll {
     void run();
   private:
     void loadGameObjects();
-    void createPipelineLayout();
-    void createPipeline();
-    void renderGameObjects(VkCommandBuffer commandBuffer);
 
     LhllWindow lhllWindow{WIDTH, HEIGHT, "Hello Vulkan!"};
     LhllDevice lhllDevice{lhllWindow};
     LhllRenderer lhllRenderer{lhllWindow, lhllDevice};
 
-    std::unique_ptr<LhllPipeline> lhllPipeline;
-    VkPipelineLayout pipelineLayout;
     std::vector<LhllGameObject> gameObjects;
   };
 }
