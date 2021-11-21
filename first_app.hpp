@@ -29,11 +29,14 @@ namespace lhll {
     void createPipelineLayout();
     void createPipeline();
     void createCommandBuffers();
+    void freeCommandBuffers();
     void drawFrame();
+    void recreateSwapChain();
+    void recordCommandBuffer(int imageIndex);
 
     LhllWindow lhllWindow{WIDTH, HEIGHT, "Hello Vulkan!"};
     LhllDevice lhllDevice{lhllWindow};
-    LhllSwapChain lhllSwapChain{lhllDevice, lhllWindow.getExtent()};
+    std::unique_ptr<LhllSwapChain> lhllSwapChain;
     std::unique_ptr<LhllPipeline> lhllPipeline;
     VkPipelineLayout pipelineLayout;
     std::vector<VkCommandBuffer> commandBuffers;

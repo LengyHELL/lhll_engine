@@ -7,7 +7,7 @@ namespace lhll {
   FirstApp::FirstApp() {
     loadModels();
     createPipelineLayout();
-    createPipeline();
+    recreateSwapChain();
     createCommandBuffers();
   }
 
@@ -74,14 +74,42 @@ namespace lhll {
   }
 
   void FirstApp::createPipeline() {
-    auto pipelineConfig = LhllPipeline::defaultPipelineConfigInfo(lhllSwapChain.width(), lhllSwapChain.height());
-    pipelineConfig.renderPass = lhllSwapChain.getRenderPass();
+    assert(lhllSwapChain != nullptr && "Cannot create pipeline before swap chain");
+    assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
+
+
+    PipelineConfigInfo pipelineConfig{};
+    LhllPipeline::defaultPipelineConfigInfo(pipelineConfig);
+    pipelineConfig.renderPass = lhllSwapChain->getRenderPass();
     pipelineConfig.pipelineLayout = pipelineLayout;
     lhllPipeline = std::make_unique<LhllPipeline>(lhllDevice, "shaders/simple_shader.vert.spv", "shaders/simple_shader.frag.spv", pipelineConfig);
   }
 
+  void FirstApp::recreateSwapChain() {
+    auto extent = lhllWindow.getExtent();
+    while (extent.width == 0 || extent.height == 0) {
+      extent = lhllWindow.getExtent();
+      glfwWaitEvents();
+    }
+
+    vkDeviceWaitIdle(lhllDevice.device());
+
+    if (lhllSwapChain == nullptr) {
+      lhllSwapChain = std::make_unique<LhllSwapChain>(lhllDevice, extent);
+    }
+    else {
+      lhllSwapChain = std::make_unique<LhllSwapChain>(lhllDevice, extent, std::move(lhllSwapChain));
+      if (lhllSwapChain->imageCount() != commandBuffers.size()) {
+        freeCommandBuffers();
+        createCommandBuffers();
+      }
+    }
+
+    createPipeline();
+  }
+
   void FirstApp::createCommandBuffers() {
-    commandBuffers.resize(lhllSwapChain.imageCount());
+    commandBuffers.resize(lhllSwapChain->imageCount());
 
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -92,50 +120,78 @@ namespace lhll {
     if (vkAllocateCommandBuffers(lhllDevice.device(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
       throw std::runtime_error("failed to allocate command buffers!");
     }
+  }
 
-    for (int i = 0; i < commandBuffers.size(); i++) {
-      VkCommandBufferBeginInfo beginInfo{};
-      beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+  void FirstApp::freeCommandBuffers() {
+    vkFreeCommandBuffers(lhllDevice.device(), lhllDevice.getCommandPool(), static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+    commandBuffers.clear();
+  }
 
-      if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS) {
-        throw std::runtime_error("failed to begin recording command buffer!");
-      }
+  void FirstApp::recordCommandBuffer(int imageIndex) {
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-      VkRenderPassBeginInfo renderPassInfo{};
-      renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-      renderPassInfo.renderPass = lhllSwapChain.getRenderPass();
-      renderPassInfo.framebuffer = lhllSwapChain.getFrameBuffer(i);
-
-      renderPassInfo.renderArea.offset = {0, 0};
-      renderPassInfo.renderArea.extent = lhllSwapChain.getSwapChainExtent();
-
-      std::array<VkClearValue, 2> clearValues{};
-      clearValues[0].color = {0.0f, 0.2f, 0.1f, 1.0f};
-      clearValues[1].depthStencil = {1.0f, 0};
-      renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-      renderPassInfo.pClearValues = clearValues.data();
-
-      vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-      lhllPipeline->bind(commandBuffers[i]);
-      lhllModel->bind(commandBuffers[i]);
-      lhllModel->draw(commandBuffers[i]);
-
-      vkCmdEndRenderPass(commandBuffers[i]);
-      if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
-        throw std::runtime_error("failed to record command buffer!");
-      }
+    if (vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo) != VK_SUCCESS) {
+      throw std::runtime_error("failed to begin recording command buffer!");
     }
 
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = lhllSwapChain->getRenderPass();
+    renderPassInfo.framebuffer = lhllSwapChain->getFrameBuffer(imageIndex);
+
+    renderPassInfo.renderArea.offset = {0, 0};
+    renderPassInfo.renderArea.extent = lhllSwapChain->getSwapChainExtent();
+
+    std::array<VkClearValue, 2> clearValues{};
+    clearValues[0].color = {0.0f, 0.2f, 0.1f, 1.0f};
+    clearValues[1].depthStencil = {1.0f, 0};
+    renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+    renderPassInfo.pClearValues = clearValues.data();
+
+    vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+    VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = static_cast<float>(lhllSwapChain->getSwapChainExtent().width);
+    viewport.height = static_cast<float>(lhllSwapChain->getSwapChainExtent().height);
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    VkRect2D scissor{{0, 0}, lhllSwapChain->getSwapChainExtent()};
+    vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
+    vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
+
+    lhllPipeline->bind(commandBuffers[imageIndex]);
+    lhllModel->bind(commandBuffers[imageIndex]);
+    lhllModel->draw(commandBuffers[imageIndex]);
+
+    vkCmdEndRenderPass(commandBuffers[imageIndex]);
+    if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS) {
+      throw std::runtime_error("failed to record command buffer!");
+    }
   }
+
   void FirstApp::drawFrame() {
     uint32_t imageIndex;
-    auto result = lhllSwapChain.acquireNextImage(&imageIndex);
+    auto result = lhllSwapChain->acquireNextImage(&imageIndex);
+
+    if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+      recreateSwapChain();
+      return;
+    }
+
     if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
       throw std::runtime_error("failed to acquire swap chain image!");
     }
 
-    result = lhllSwapChain.submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+    recordCommandBuffer(imageIndex);
+    result = lhllSwapChain->submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || lhllWindow.wasWindowResized()) {
+      lhllWindow.resetWindowResizedFlag();
+      recreateSwapChain();
+      return;
+    }
     if(result != VK_SUCCESS) {
       throw std::runtime_error("failed to present swap chain image!");
     }

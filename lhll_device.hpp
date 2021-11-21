@@ -36,9 +36,9 @@ namespace lhll {
 
     // Not copyable or movable
     LhllDevice(const LhllDevice &) = delete;
-    void operator=(const LhllDevice &) = delete;
+    LhllDevice& operator=(const LhllDevice &) = delete;
     LhllDevice(LhllDevice &&) = delete;
-    LhllDevice &operator=(LhllDevice &&) = delete;
+    LhllDevice& operator=(LhllDevice &&) = delete;
 
     VkCommandPool getCommandPool() { return commandPool; }
     VkDevice device() { return device_; }
