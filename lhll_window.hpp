@@ -28,7 +28,7 @@ namespace lhll {
 
     int width;
     int height;
-    bool framebufferResized = false;
+    bool framebufferResized{false};
 
     std::string windowName;
     GLFWwindow *window;

@@ -42,7 +42,7 @@ namespace lhll {
     std::vector<VkCommandBuffer> commandBuffers;
 
     uint32_t currentImageIndex;
-    bool isFrameStarted;
+    bool isFrameStarted{false};
   };
 }
 

@@ -6,7 +6,7 @@
 
 namespace lhll {
 
-  LhllRenderer::LhllRenderer(LhllWindow& window, LhllDevice& device) : lhllWindow{window}, lhllDevice{device}, isFrameStarted{false} {
+  LhllRenderer::LhllRenderer(LhllWindow& window, LhllDevice& device) : lhllWindow{window}, lhllDevice{device} {
     recreateSwapChain();
     createCommandBuffers();
   }
@@ -98,7 +98,7 @@ namespace lhll {
       lhllWindow.resetWindowResizedFlag();
       recreateSwapChain();
     }
-    if(result != VK_SUCCESS) {
+    else if(result != VK_SUCCESS) {
       throw std::runtime_error("failed to present swap chain image!");
     }
 
