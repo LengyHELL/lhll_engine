@@ -12,7 +12,6 @@
 #include <stdexcept>
 
 namespace lhll {
-
   FirstApp::FirstApp() { loadGameObjects(); }
 
   FirstApp::~FirstApp() {}
@@ -24,6 +23,9 @@ namespace lhll {
       glfwPollEvents();
 
       if (auto commandBuffer = lhllRenderer.beginFrame()) {
+        // update systems
+
+        // render system
         lhllRenderer.beginSwapChainRenderPass(commandBuffer);
         simpleRenderSystem.renderGameObjects(commandBuffer, gameObjects);
         lhllRenderer.endSwapChainRenderPass(commandBuffer);
@@ -34,50 +36,72 @@ namespace lhll {
     vkDeviceWaitIdle(lhllDevice.device());
   }
 
-  void lot_triangles(std::vector<LhllModel::Vertex>& vertices, const int& iter = 1) {
-    for (int it = 0; it < iter; it++) {
-      std::vector<LhllModel::Vertex> temp;
-      int size = vertices.size();
-      for (int i = 0; i < size; i++) {
-        temp.push_back(vertices[i]);
-        int start = int(i / 3) * 3;
-        for (int j = start; j < start + 3; j++) {
-          if (i != j) {
-            glm::vec2 a = vertices[i].position;
-            glm::vec2 b = vertices[j].position;
-            b -= a;
-            float len = glm::length(b);
-            b = glm::normalize(b);
-            b = a + (b * (len / 2));
-            temp.push_back({{b.x, b.y}, vertices[j].color});
-          }
-        }
-      }
-      vertices = temp;
+  std::unique_ptr<LhllModel> createCubeModel(LhllDevice& device, glm::vec3 offset) {
+    std::vector<LhllModel::Vertex> vertices{
+
+        // left face (white)
+        {{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
+        {{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
+        {{-.5f, -.5f, .5f}, {.9f, .9f, .9f}},
+        {{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
+        {{-.5f, .5f, -.5f}, {.9f, .9f, .9f}},
+        {{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
+
+        // right face (yellow)
+        {{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
+        {{.5f, .5f, .5f}, {.8f, .8f, .1f}},
+        {{.5f, -.5f, .5f}, {.8f, .8f, .1f}},
+        {{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
+        {{.5f, .5f, -.5f}, {.8f, .8f, .1f}},
+        {{.5f, .5f, .5f}, {.8f, .8f, .1f}},
+
+        // top face (orange, remember y axis points down)
+        {{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
+        {{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
+        {{-.5f, -.5f, .5f}, {.9f, .6f, .1f}},
+        {{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
+        {{.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
+        {{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
+
+        // bottom face (red)
+        {{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
+        {{.5f, .5f, .5f}, {.8f, .1f, .1f}},
+        {{-.5f, .5f, .5f}, {.8f, .1f, .1f}},
+        {{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
+        {{.5f, .5f, -.5f}, {.8f, .1f, .1f}},
+        {{.5f, .5f, .5f}, {.8f, .1f, .1f}},
+
+        // nose face (blue)
+        {{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
+        {{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
+        {{-.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
+        {{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
+        {{.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
+        {{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
+
+        // tail face (green)
+        {{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
+        {{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
+        {{-.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
+        {{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
+        {{.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
+        {{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
+
+    };
+    for (auto& v : vertices) {
+      v.position += offset;
     }
+    return std::make_unique<LhllModel>(device, vertices);
   }
 
   void FirstApp::loadGameObjects() {
-    std::vector<LhllModel::Vertex> vertices {
-      {{  0.0f, -0.6f}, {0.6f, 0.0f, 0.0f}},
-      {{  0.6f,  0.6f}, {0.0f, 0.6f, 0.0f}},
-      {{ -0.6f,  0.6f}, {0.0f, 0.0f, 0.6f}}
-    };
+    std::shared_ptr<LhllModel> lhllModel = createCubeModel(lhllDevice, {0.0f, 0.0f, 0.0f});
 
-    lot_triangles(vertices, 0);
+    auto cube = LhllGameObject::createGameObject();
+    cube.model = lhllModel;
+    cube.transform.translation = {0.0f, 0.0f, 0.5f};
+    cube.transform.scale = {0.5f, 0.5f, 0.5f};
 
-    for (float i = 0; i < 50; i += 0.1) {
-      auto lhllModel = std::make_shared<LhllModel>(lhllDevice, vertices);
-
-      auto triangle = LhllGameObject::createGameObject();
-      triangle.model = lhllModel;
-      triangle.color = {0.1f * i, 0.2f * (i / 2), 0.1f};
-      triangle.transform2d.translation.x = 0.0f;
-      triangle.transform2d.scale = {0.1f * i, 0.1f * i};
-      triangle.transform2d.rotation = 0.25 * glm::two_pi<float>();
-
-      gameObjects.push_back(std::move(triangle));
-    }
+    gameObjects.push_back(std::move(cube));
   }
-
 }
