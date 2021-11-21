@@ -4,8 +4,8 @@
 #include "lhll_device.hpp"
 #include "lhll_game_object.hpp"
 #include "lhll_pipeline.hpp"
-#include "lhll_swap_chain.hpp"
 #include "lhll_window.hpp"
+#include "lhll_renderer.hpp"
 
 #include <memory>
 #include <vector>
@@ -27,19 +27,14 @@ namespace lhll {
     void loadGameObjects();
     void createPipelineLayout();
     void createPipeline();
-    void createCommandBuffers();
-    void freeCommandBuffers();
-    void drawFrame();
-    void recreateSwapChain();
-    void recordCommandBuffer(int imageIndex);
     void renderGameObjects(VkCommandBuffer commandBuffer);
 
     LhllWindow lhllWindow{WIDTH, HEIGHT, "Hello Vulkan!"};
     LhllDevice lhllDevice{lhllWindow};
-    std::unique_ptr<LhllSwapChain> lhllSwapChain;
+    LhllRenderer lhllRenderer{lhllWindow, lhllDevice};
+
     std::unique_ptr<LhllPipeline> lhllPipeline;
     VkPipelineLayout pipelineLayout;
-    std::vector<VkCommandBuffer> commandBuffers;
     std::vector<LhllGameObject> gameObjects;
   };
 }
