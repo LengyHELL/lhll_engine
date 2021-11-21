@@ -72,9 +72,9 @@ namespace lhll {
       auto triangle = LhllGameObject::createGameObject();
       triangle.model = lhllModel;
       triangle.color = {0.1f * i, 0.2f * (i / 2), 0.1f};
-      triangle.transform2D.translation.x = 0.2f;
-      triangle.transform2D.scale = {0.1f * i, 0.1f * i};
-      triangle.transform2D.rotation = 0.25 * glm::two_pi<float>();
+      triangle.transform2d.translation.x = 0.0f;
+      triangle.transform2d.scale = {0.1f * i, 0.1f * i};
+      triangle.transform2d.rotation = 0.25 * glm::two_pi<float>();
 
       gameObjects.push_back(std::move(triangle));
     }

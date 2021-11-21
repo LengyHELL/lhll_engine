@@ -6,6 +6,11 @@
 #include <memory>
 
 namespace lhll {
+  struct RigidBody2dComponent {
+    glm::vec2 velocity;
+    float mass{1.0f};
+  };
+
   struct Transform2dComponent {
     glm::vec2 translation{};
     glm::vec2 scale{1.0f, 1.0f};
@@ -14,14 +19,8 @@ namespace lhll {
     glm::mat2 mat2() {
       const float s = glm::sin(rotation);
       const float c = glm::cos(rotation);
-      glm::mat2 rotateMat{
-        {c, s},
-        {-s, c}
-      };
-      glm::mat2 scaleMat{
-        {scale.x, 0.0f},
-        {0.0f, scale.y}
-      };
+      glm::mat2 rotateMat{{c, s}, {-s, c}};
+      glm::mat2 scaleMat{{scale.x, 0.0f}, {0.0f, scale.y}};
       return rotateMat * scaleMat;
     }
   };
@@ -44,7 +43,8 @@ namespace lhll {
 
     std::shared_ptr<LhllModel> model{};
     glm::vec3 color{};
-    Transform2dComponent transform2D{};
+    Transform2dComponent transform2d{};
+    RigidBody2dComponent rigidBody2d{};
 
   private:
     LhllGameObject(id_t objId) : id{objId} {}

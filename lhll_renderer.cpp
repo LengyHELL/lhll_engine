@@ -28,10 +28,11 @@ namespace lhll {
       lhllSwapChain = std::make_unique<LhllSwapChain>(lhllDevice, extent);
     }
     else {
-      lhllSwapChain = std::make_unique<LhllSwapChain>(lhllDevice, extent, std::move(lhllSwapChain));
-      if (lhllSwapChain->imageCount() != commandBuffers.size()) {
-        freeCommandBuffers();
-        createCommandBuffers();
+      std::shared_ptr<LhllSwapChain> oldSwapChain = std::move(lhllSwapChain);
+      lhllSwapChain = std::make_unique<LhllSwapChain>(lhllDevice, extent, oldSwapChain);
+
+      if (!oldSwapChain->compareSwapFormats(*lhllSwapChain.get())) {
+        throw std::runtime_error("Swap chain image or depth format has changed");
       }
     }
     // we'll come back later
@@ -39,7 +40,7 @@ namespace lhll {
 
 
   void LhllRenderer::createCommandBuffers() {
-    commandBuffers.resize(lhllSwapChain->imageCount());
+    commandBuffers.resize(LhllSwapChain::MAX_FRAMES_IN_FLIGHT);
 
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -103,6 +104,7 @@ namespace lhll {
     }
 
     isFrameStarted = false;
+    currentFrameIndex = (currentFrameIndex + 1) % LhllSwapChain::MAX_FRAMES_IN_FLIGHT;
   }
 
   void LhllRenderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer) {

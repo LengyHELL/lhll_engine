@@ -61,16 +61,16 @@ namespace lhll {
     int i = 0;
     for (auto& obj : gameObjects) {
       i += 1;
-      obj.transform2D.rotation = glm::mod<float>(obj.transform2D.rotation + 0.0001f * i, 2.0f * glm::pi<float>());
+      obj.transform2d.rotation = glm::mod<float>(obj.transform2d.rotation + 0.0001f * i, 2.0f * glm::pi<float>());
     }
 
     // render
     lhllPipeline->bind(commandBuffer);
     for (auto& obj : gameObjects) {
       SimplePushConstantData push{};
-      push.offset = obj.transform2D.translation;
+      push.offset = obj.transform2d.translation;
       push.color = obj.color;
-      push.transform = obj.transform2D.mat2();
+      push.transform = obj.transform2d.mat2();
 
       vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
       obj.model->bind(commandBuffer);
