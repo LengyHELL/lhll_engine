@@ -7,6 +7,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 
+#include <memory>
 #include <vector>
 
 namespace lhll {
@@ -14,15 +15,24 @@ namespace lhll {
   public:
 
     struct Vertex {
-      glm::vec3 position;
-      glm::vec3 color;
+      glm::vec3 position{};
+      glm::vec3 color{};
+      glm::vec3 normal{};
+      glm::vec2 uv{};
+
       static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
       static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
+
+      bool operator==(const Vertex& other) const {
+        return (position == other.position) && (color == other.color) && (normal == other.normal) && (uv == other.uv);
+      }
     };
 
     struct Builder {
       std::vector<Vertex> vertices{};
       std::vector<uint32_t> indices{};
+
+      void loadModel(const std::string& filepath);
     };
 
     LhllModel(LhllDevice& device, const LhllModel::Builder& builder);
@@ -30,6 +40,8 @@ namespace lhll {
 
     LhllModel(const LhllModel&) = delete;
     LhllModel& operator=(const LhllModel&) = delete;
+
+    static std::unique_ptr<LhllModel> createModelFromFile(LhllDevice& device, const std::string& filepath);
 
     void bind(VkCommandBuffer commandBuffer);
     void draw(VkCommandBuffer commandBuffer);
