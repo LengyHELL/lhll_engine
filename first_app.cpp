@@ -68,13 +68,18 @@ namespace lhll {
   }
 
   void FirstApp::loadGameObjects() {
-    std::shared_ptr<LhllModel> lhllModel = LhllModel::createModelFromFile(lhllDevice, "models/smooth_vase.obj");
+    std::shared_ptr<LhllModel> lhllModel = LhllModel::createModelFromFile(lhllDevice, "models/flat_vase.obj");
+    auto flatVase = LhllGameObject::createGameObject();
+    flatVase.model = lhllModel;
+    flatVase.transform.translation = {-0.5f, 0.5f, 2.5f};
+    flatVase.transform.scale = {3.0f, 1.5f, 3.0f};
+    gameObjects.push_back(std::move(flatVase));
 
-    auto gameObj = LhllGameObject::createGameObject();
-    gameObj.model = lhllModel;
-    gameObj.transform.translation = {0.0f, 0.0f, 2.5f};
-    gameObj.transform.scale = glm::vec3{3.0f};
-
-    gameObjects.push_back(std::move(gameObj));
+    lhllModel = LhllModel::createModelFromFile(lhllDevice, "models/smooth_vase.obj");
+    auto smoothVase = LhllGameObject::createGameObject();
+    smoothVase.model = lhllModel;
+    smoothVase.transform.translation = {0.5f, 0.5f, 2.5f};
+    smoothVase.transform.scale = {3.0f, 1.5f, 3.0f};
+    gameObjects.push_back(std::move(smoothVase));
   }
 }
