@@ -1,7 +1,7 @@
-CFLAGS = -std=c++17 -O2
-LDFLAGS = -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
-GLSLC = glslc
+include .env
 
+CFLAGS = -std=c++17 -O2 -I$(TINYOBJ_PATH)
+LDFLAGS = -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 
 vertSources = $(shell find ./shaders -type f -name "*.vert")
 vertObjFiles = $(patsubst %.vert, %.vert.spv, $(vertSources))
