@@ -13,7 +13,7 @@
 namespace lhll {
   class SimpleRenderSystem {
   public:
-    SimpleRenderSystem(LhllDevice& device, VkRenderPass renderPass);
+    SimpleRenderSystem(LhllDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
     ~SimpleRenderSystem();
 
     SimpleRenderSystem(const SimpleRenderSystem&) = delete;
@@ -22,7 +22,7 @@ namespace lhll {
     void renderGameObjects(FrameInfo& frameInfo, std::vector<LhllGameObject>& gameObjects);
 
   private:
-    void createPipelineLayout();
+    void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
     void createPipeline(VkRenderPass renderPass);
 
     LhllDevice& lhllDevice;

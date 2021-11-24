@@ -5,6 +5,7 @@
 #include "lhll_game_object.hpp"
 #include "lhll_window.hpp"
 #include "lhll_renderer.hpp"
+#include "lhll_descriptors.hpp"
 
 #include <memory>
 #include <vector>
@@ -25,10 +26,11 @@ namespace lhll {
   private:
     void loadGameObjects();
 
-    LhllWindow lhllWindow{WIDTH, HEIGHT, "Hello Vulkan!"};
+    LhllWindow lhllWindow{WIDTH, HEIGHT, "Vulkan engine"};
     LhllDevice lhllDevice{lhllWindow};
     LhllRenderer lhllRenderer{lhllWindow, lhllDevice};
 
+    std::unique_ptr<LhllDescriptorPool> globalPool{};
     std::vector<LhllGameObject> gameObjects;
   };
 }

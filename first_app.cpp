@@ -19,11 +19,14 @@
 
 namespace lhll {
   struct GlobalUbo {
-    glm::mat4 projectionView{1.0f};
-    glm::vec3 lightDirection = glm::normalize(glm::vec3{1.0f, -3.0f, -1.0f});
+    alignas(16) glm::mat4 projectionView{1.0f};
+    alignas(16) glm::vec3 lightDirection = glm::normalize(glm::vec3{1.0f, -3.0f, -1.0f});
   };
 
-  FirstApp::FirstApp() { loadGameObjects(); }
+  FirstApp::FirstApp() {
+    globalPool = LhllDescriptorPool::Builder(lhllDevice).setMaxSets(LhllSwapChain::MAX_FRAMES_IN_FLIGHT).addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, LhllSwapChain::MAX_FRAMES_IN_FLIGHT).build();
+    loadGameObjects();
+    }
 
   FirstApp::~FirstApp() {}
 
@@ -34,7 +37,15 @@ namespace lhll {
       uboBuffers[i]->map();
     }
 
-    SimpleRenderSystem simpleRenderSystem{lhllDevice, lhllRenderer.getSwapChainRenderPass()};
+    auto globalSetLayout = LhllDescriptorSetLayout::Builder(lhllDevice).addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT).build();
+
+    std::vector<VkDescriptorSet> globalDescriptorSets(LhllSwapChain::MAX_FRAMES_IN_FLIGHT);
+    for (int i = 0; i < globalDescriptorSets.size(); i++) {
+      auto bufferInfo = uboBuffers[i]->descriptorInfo();
+      LhllDescriptorWriter(*globalSetLayout, *globalPool).writeBuffer(0, &bufferInfo).build(globalDescriptorSets[i]);
+    }
+
+    SimpleRenderSystem simpleRenderSystem{lhllDevice, lhllRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
     LhllCamera camera{};
     //camera.setViewDirection(glm::vec3(0.0f), glm::vec3(0.5f, 0.0f, 1.0f));
     camera.setViewTarget(glm::vec3(-1.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 2.5f));
@@ -63,7 +74,7 @@ namespace lhll {
 
       if (auto commandBuffer = lhllRenderer.beginFrame()) {
         int frameIndex = lhllRenderer.getFrameIndex();
-        FrameInfo frameInfo{frameIndex, frameTime, commandBuffer, camera};
+        FrameInfo frameInfo{frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex]};
 
         // update systems
         GlobalUbo ubo{};

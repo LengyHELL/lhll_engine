@@ -11,6 +11,7 @@ namespace lhll {
         float frameTime;
         VkCommandBuffer commandBuffer;
         LhllCamera &camera;
+        VkDescriptorSet globalDescriptorSet;
     };
 }
 
