@@ -18,6 +18,7 @@ namespace lhll {
       int lookRight = GLFW_KEY_RIGHT;
       int lookUp = GLFW_KEY_UP;
       int lookDown = GLFW_KEY_DOWN;
+      int enableCursor = GLFW_KEY_ESCAPE;
     };
 
     void moveInPlaneXZ(GLFWwindow* window, float dt, LhllGameObject& gameObject);
@@ -29,6 +30,10 @@ namespace lhll {
 
     glm::vec2 mousePrevious{0.0f};
     glm::vec2 mouseMovement{0.0f};
+
+    bool setCursor = false;
+    bool setCursorLock = true;
+    bool cursorEnabled = true;
   };
 }
 

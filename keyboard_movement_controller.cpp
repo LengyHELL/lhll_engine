@@ -35,13 +35,28 @@ namespace lhll {
   }
 
   void KeyboardMovementController::moveInPlaneXZMouse(GLFWwindow* window, float dt, glm::vec2 mousePosition, LhllGameObject& gameObject) {
+
+    if ((glfwGetKey(window, keys.enableCursor) == GLFW_PRESS) && (!setCursorLock)) {
+      setCursorLock = true;
+      setCursor = true;
+    }
+    if (glfwGetKey(window, keys.enableCursor) != GLFW_PRESS) { setCursorLock = false; }
+
+    if (setCursor) {
+      setCursor = false;
+      cursorEnabled = !cursorEnabled;
+      if (cursorEnabled) { glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); }
+      else { glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); }
+    }
+
     mouseMovement = mousePosition - mousePrevious;
     mousePrevious = mousePosition;
 
-
     glm::vec3 rotate{0};
-    rotate.x -= mouseMovement.x;
-    rotate.y += mouseMovement.y;
+    if (!cursorEnabled) {
+      rotate.x -= mouseMovement.x;
+      rotate.y += mouseMovement.y;
+    }
     if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon()) {
       gameObject.transform.rotation += lookSpeed * dt * rotate;
     }

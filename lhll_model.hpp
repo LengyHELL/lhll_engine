@@ -2,6 +2,7 @@
 #define LHLL_MODEL_HPP
 
 #include "lhll_device.hpp"
+#include "lhll_buffer.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -52,13 +53,11 @@ namespace lhll {
 
     LhllDevice& lhllDevice;
 
-    VkBuffer vertexBuffer;
-    VkDeviceMemory vertexBufferMemory;
+    std::unique_ptr<LhllBuffer> vertexBuffer;
     uint32_t vertexCount;
 
     bool hasIndexBuffer = false;
-    VkBuffer indexBuffer;
-    VkDeviceMemory indexBufferMemory;
+    std::unique_ptr<LhllBuffer> indexBuffer;
     uint32_t indexCount;
   };
 }

@@ -1,6 +1,7 @@
 #include "first_app.hpp"
 
 #include "keyboard_movement_controller.hpp"
+#include "lhll_buffer.hpp"
 #include "lhll_camera.hpp"
 #include "simple_render_system.hpp"
 
@@ -17,11 +18,19 @@
 #include <iostream>
 
 namespace lhll {
+  struct GlobalUbo {
+    glm::mat4 projectionView{1.0f};
+    glm::vec3 lightDirection = glm::normalize(glm::vec3{1.0f, -3.0f, -1.0f});
+  };
+
   FirstApp::FirstApp() { loadGameObjects(); }
 
   FirstApp::~FirstApp() {}
 
   void FirstApp::run() {
+    LhllBuffer globalUboBuffer{lhllDevice, sizeof(GlobalUbo), LhllSwapChain::MAX_FRAMES_IN_FLIGHT, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, lhllDevice.properties.limits.minUniformBufferOffsetAlignment};
+    globalUboBuffer.map();
+
     SimpleRenderSystem simpleRenderSystem{lhllDevice, lhllRenderer.getSwapChainRenderPass()};
     LhllCamera camera{};
     //camera.setViewDirection(glm::vec3(0.0f), glm::vec3(0.5f, 0.0f, 1.0f));
@@ -32,11 +41,7 @@ namespace lhll {
 
     auto currentTime = std::chrono::high_resolution_clock::now();
 
-    glfwSetInputMode(lhllWindow.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-    if (glfwRawMouseMotionSupported()) {
-      glfwSetInputMode(lhllWindow.getGLFWwindow(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-    }
+    glfwSetInputMode(lhllWindow.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     while (!lhllWindow.shouldClose()) {
       double xpos, ypos;
@@ -54,11 +59,18 @@ namespace lhll {
       camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
       if (auto commandBuffer = lhllRenderer.beginFrame()) {
+        int frameIndex = lhllRenderer.getFrameIndex();
+        FrameInfo frameInfo{frameIndex, frameTime, commandBuffer, camera};
+
         // update systems
+        GlobalUbo ubo{};
+        ubo.projectionView = camera.getProjection() * camera.getView();
+        globalUboBuffer.writeToIndex(&ubo, frameIndex);
+        globalUboBuffer.flushIndex(frameIndex);
 
         // render system
         lhllRenderer.beginSwapChainRenderPass(commandBuffer);
-        simpleRenderSystem.renderGameObjects(commandBuffer, gameObjects, camera);
+        simpleRenderSystem.renderGameObjects(frameInfo, gameObjects);
         lhllRenderer.endSwapChainRenderPass(commandBuffer);
         lhllRenderer.endFrame();
       }

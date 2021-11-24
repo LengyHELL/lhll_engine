@@ -3,6 +3,7 @@
 
 #include "lhll_camera.hpp"
 #include "lhll_device.hpp"
+#include "lhll_frame_info.hpp"
 #include "lhll_game_object.hpp"
 #include "lhll_pipeline.hpp"
 
@@ -18,7 +19,7 @@ namespace lhll {
     SimpleRenderSystem(const SimpleRenderSystem&) = delete;
     SimpleRenderSystem& operator=(const SimpleRenderSystem&) = delete;
 
-    void renderGameObjects(VkCommandBuffer commandBuffer, std::vector<LhllGameObject>& gameObjects, const LhllCamera& camera);
+    void renderGameObjects(FrameInfo& frameInfo, std::vector<LhllGameObject>& gameObjects);
 
   private:
     void createPipelineLayout();
