@@ -19,8 +19,10 @@
 
 namespace lhll {
   struct GlobalUbo {
-    alignas(16) glm::mat4 projectionView{1.0f};
-    alignas(16) glm::vec3 lightDirection = glm::normalize(glm::vec3{1.0f, -3.0f, -1.0f});
+    glm::mat4 projectionView{1.0f};
+    glm::vec4 ambientLightColor{1.0f, 1.0f, 1.0f, 0.02f};
+    glm::vec3 lightPosition{-1.0f};
+    alignas(16) glm::vec4 lightColor{1.0f};
   };
 
   FirstApp::FirstApp() {
@@ -51,6 +53,7 @@ namespace lhll {
     camera.setViewTarget(glm::vec3(-1.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 2.5f));
 
     auto viewerObject = LhllGameObject::createGameObject();
+    viewerObject.transform.translation.z = -2.5;
     KeyboardMovementController cameraController{};
 
     auto currentTime = std::chrono::high_resolution_clock::now();
@@ -97,15 +100,22 @@ namespace lhll {
     std::shared_ptr<LhllModel> lhllModel = LhllModel::createModelFromFile(lhllDevice, "models/flat_vase.obj");
     auto flatVase = LhllGameObject::createGameObject();
     flatVase.model = lhllModel;
-    flatVase.transform.translation = {-0.5f, 0.5f, 2.5f};
+    flatVase.transform.translation = {-0.5f, 0.5f, 0.0f};
     flatVase.transform.scale = {3.0f, 1.5f, 3.0f};
     gameObjects.push_back(std::move(flatVase));
 
     lhllModel = LhllModel::createModelFromFile(lhllDevice, "models/smooth_vase.obj");
     auto smoothVase = LhllGameObject::createGameObject();
     smoothVase.model = lhllModel;
-    smoothVase.transform.translation = {0.5f, 0.5f, 2.5f};
+    smoothVase.transform.translation = {0.5f, 0.5f, 0.0f};
     smoothVase.transform.scale = {3.0f, 1.5f, 3.0f};
     gameObjects.push_back(std::move(smoothVase));
+
+    lhllModel = LhllModel::createModelFromFile(lhllDevice, "models/quad.obj");
+    auto floor = LhllGameObject::createGameObject();
+    floor.model = lhllModel;
+    floor.transform.translation = {0.0f, 0.5f, 0.0f};
+    floor.transform.scale = {10.0f, 0.0f, 10.0f};
+    gameObjects.push_back(std::move(floor));
   }
 }
