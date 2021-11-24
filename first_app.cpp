@@ -39,7 +39,7 @@ namespace lhll {
       uboBuffers[i]->map();
     }
 
-    auto globalSetLayout = LhllDescriptorSetLayout::Builder(lhllDevice).addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT).build();
+    auto globalSetLayout = LhllDescriptorSetLayout::Builder(lhllDevice).addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS).build();
 
     std::vector<VkDescriptorSet> globalDescriptorSets(LhllSwapChain::MAX_FRAMES_IN_FLIGHT);
     for (int i = 0; i < globalDescriptorSets.size(); i++) {
@@ -77,7 +77,7 @@ namespace lhll {
 
       if (auto commandBuffer = lhllRenderer.beginFrame()) {
         int frameIndex = lhllRenderer.getFrameIndex();
-        FrameInfo frameInfo{frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex]};
+        FrameInfo frameInfo{frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex], gameObjects};
 
         // update systems
         GlobalUbo ubo{};
@@ -87,7 +87,7 @@ namespace lhll {
 
         // render system
         lhllRenderer.beginSwapChainRenderPass(commandBuffer);
-        simpleRenderSystem.renderGameObjects(frameInfo, gameObjects);
+        simpleRenderSystem.renderGameObjects(frameInfo);
         lhllRenderer.endSwapChainRenderPass(commandBuffer);
         lhllRenderer.endFrame();
       }
@@ -102,20 +102,20 @@ namespace lhll {
     flatVase.model = lhllModel;
     flatVase.transform.translation = {-0.5f, 0.5f, 0.0f};
     flatVase.transform.scale = {3.0f, 1.5f, 3.0f};
-    gameObjects.push_back(std::move(flatVase));
+    gameObjects.emplace(flatVase.getId(), std::move(flatVase));
 
     lhllModel = LhllModel::createModelFromFile(lhllDevice, "models/smooth_vase.obj");
     auto smoothVase = LhllGameObject::createGameObject();
     smoothVase.model = lhllModel;
     smoothVase.transform.translation = {0.5f, 0.5f, 0.0f};
     smoothVase.transform.scale = {3.0f, 1.5f, 3.0f};
-    gameObjects.push_back(std::move(smoothVase));
+    gameObjects.emplace(smoothVase.getId(), std::move(smoothVase));
 
     lhllModel = LhllModel::createModelFromFile(lhllDevice, "models/quad.obj");
     auto floor = LhllGameObject::createGameObject();
     floor.model = lhllModel;
     floor.transform.translation = {0.0f, 0.5f, 0.0f};
-    floor.transform.scale = {10.0f, 0.0f, 10.0f};
-    gameObjects.push_back(std::move(floor));
+    floor.transform.scale = {10.0f, 1.0f, 10.0f};
+    gameObjects.emplace(floor.getId(), std::move(floor));
   }
 }

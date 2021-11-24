@@ -31,7 +31,7 @@ namespace lhll {
     LhllRenderer lhllRenderer{lhllWindow, lhllDevice};
 
     std::unique_ptr<LhllDescriptorPool> globalPool{};
-    std::vector<LhllGameObject> gameObjects;
+    LhllGameObject::Map gameObjects;
   };
 }
 

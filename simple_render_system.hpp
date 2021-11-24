@@ -19,7 +19,7 @@ namespace lhll {
     SimpleRenderSystem(const SimpleRenderSystem&) = delete;
     SimpleRenderSystem& operator=(const SimpleRenderSystem&) = delete;
 
-    void renderGameObjects(FrameInfo& frameInfo, std::vector<LhllGameObject>& gameObjects);
+    void renderGameObjects(FrameInfo& frameInfo);
 
   private:
     void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
