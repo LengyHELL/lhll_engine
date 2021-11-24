@@ -28,8 +28,11 @@ namespace lhll {
   FirstApp::~FirstApp() {}
 
   void FirstApp::run() {
-    LhllBuffer globalUboBuffer{lhllDevice, sizeof(GlobalUbo), LhllSwapChain::MAX_FRAMES_IN_FLIGHT, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, lhllDevice.properties.limits.minUniformBufferOffsetAlignment};
-    globalUboBuffer.map();
+    std::vector<std::unique_ptr<LhllBuffer>> uboBuffers(LhllSwapChain::MAX_FRAMES_IN_FLIGHT);
+    for (int i = 0; i < uboBuffers.size(); i++) {
+      uboBuffers[i] = std::make_unique<LhllBuffer>(lhllDevice, sizeof(GlobalUbo), 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, lhllDevice.properties.limits.minUniformBufferOffsetAlignment);
+      uboBuffers[i]->map();
+    }
 
     SimpleRenderSystem simpleRenderSystem{lhllDevice, lhllRenderer.getSwapChainRenderPass()};
     LhllCamera camera{};
@@ -65,8 +68,8 @@ namespace lhll {
         // update systems
         GlobalUbo ubo{};
         ubo.projectionView = camera.getProjection() * camera.getView();
-        globalUboBuffer.writeToIndex(&ubo, frameIndex);
-        globalUboBuffer.flushIndex(frameIndex);
+        uboBuffers[frameIndex]->writeToBuffer(&ubo);
+        uboBuffers[frameIndex]->flush();
 
         // render system
         lhllRenderer.beginSwapChainRenderPass(commandBuffer);
