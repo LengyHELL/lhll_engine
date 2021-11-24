@@ -44,7 +44,7 @@ class LhllBuffer {
  private:
   static VkDeviceSize getAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment);
 
-  LhllDevice& lveDevice;
+  LhllDevice& lhllDevice;
   void* mapped = nullptr;
   VkBuffer buffer = VK_NULL_HANDLE;
   VkDeviceMemory memory = VK_NULL_HANDLE;
@@ -57,6 +57,6 @@ class LhllBuffer {
   VkMemoryPropertyFlags memoryPropertyFlags;
 };
 
-}  // namespace lve
+}  // namespace lhll
 
 #endif

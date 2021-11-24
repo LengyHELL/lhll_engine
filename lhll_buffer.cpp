@@ -36,7 +36,7 @@ LhllBuffer::LhllBuffer(
     VkBufferUsageFlags usageFlags,
     VkMemoryPropertyFlags memoryPropertyFlags,
     VkDeviceSize minOffsetAlignment)
-    : lveDevice{device},
+    : lhllDevice{device},
       instanceSize{instanceSize},
       instanceCount{instanceCount},
       usageFlags{usageFlags},
@@ -48,8 +48,8 @@ LhllBuffer::LhllBuffer(
 
 LhllBuffer::~LhllBuffer() {
   unmap();
-  vkDestroyBuffer(lveDevice.device(), buffer, nullptr);
-  vkFreeMemory(lveDevice.device(), memory, nullptr);
+  vkDestroyBuffer(lhllDevice.device(), buffer, nullptr);
+  vkFreeMemory(lhllDevice.device(), memory, nullptr);
 }
 
 /**
@@ -63,7 +63,7 @@ LhllBuffer::~LhllBuffer() {
  */
 VkResult LhllBuffer::map(VkDeviceSize size, VkDeviceSize offset) {
   assert(buffer && memory && "Called map on buffer before create");
-  return vkMapMemory(lveDevice.device(), memory, offset, size, 0, &mapped);
+  return vkMapMemory(lhllDevice.device(), memory, offset, size, 0, &mapped);
 }
 
 /**
@@ -73,7 +73,7 @@ VkResult LhllBuffer::map(VkDeviceSize size, VkDeviceSize offset) {
  */
 void LhllBuffer::unmap() {
   if (mapped) {
-    vkUnmapMemory(lveDevice.device(), memory);
+    vkUnmapMemory(lhllDevice.device(), memory);
     mapped = nullptr;
   }
 }
@@ -116,7 +116,7 @@ VkResult LhllBuffer::flush(VkDeviceSize size, VkDeviceSize offset) {
   mappedRange.memory = memory;
   mappedRange.offset = offset;
   mappedRange.size = size;
-  return vkFlushMappedMemoryRanges(lveDevice.device(), 1, &mappedRange);
+  return vkFlushMappedMemoryRanges(lhllDevice.device(), 1, &mappedRange);
 }
 
 /**
@@ -136,7 +136,7 @@ VkResult LhllBuffer::invalidate(VkDeviceSize size, VkDeviceSize offset) {
   mappedRange.memory = memory;
   mappedRange.offset = offset;
   mappedRange.size = size;
-  return vkInvalidateMappedMemoryRanges(lveDevice.device(), 1, &mappedRange);
+  return vkInvalidateMappedMemoryRanges(lhllDevice.device(), 1, &mappedRange);
 }
 
 /**
@@ -198,4 +198,4 @@ VkResult LhllBuffer::invalidateIndex(int index) {
   return invalidate(alignmentSize, index * alignmentSize);
 }
 
-}  // namespace lve
+}  // namespace lhll
