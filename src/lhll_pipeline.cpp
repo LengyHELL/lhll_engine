@@ -1,3 +1,7 @@
+#ifndef ENGINE_DIR
+#define ENGINE_DIR "../"
+#endif
+
 #include "lhll_pipeline.hpp"
 
 #include "lhll_model.hpp"
@@ -21,7 +25,7 @@ namespace lhll {
   }
 
   std::vector<char> LhllPipeline::readFile(const std::string& filepath) {
-    std::ifstream file {filepath, std::ios::ate | std::ios::binary};
+    std::ifstream file {ENGINE_DIR + filepath, std::ios::ate | std::ios::binary};
 
     if (!file.is_open()) {
       throw std::runtime_error("Failed to open file: " + filepath);

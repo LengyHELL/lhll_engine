@@ -1,5 +1,5 @@
 *.pch
 *.out
-.env
-dev
+external
 .vscode
+build

@@ -1,3 +1,7 @@
+#ifndef ENGINE_DIR
+#define ENGINE_DIR "../"
+#endif
+
 #include "lhll_model.hpp"
 
 #include "lhll_utils.hpp"
@@ -32,7 +36,7 @@ namespace lhll {
 
   std::unique_ptr<LhllModel> LhllModel::createModelFromFile(LhllDevice& device, const std::string& filepath) {
     Builder builder{};
-    builder.loadModel(filepath);
+    builder.loadModel(ENGINE_DIR + filepath);
     return std::make_unique<LhllModel>(device, builder);
   }
 
