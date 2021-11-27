@@ -3,4 +3,4 @@
 external
 .vscode
 build
-shaders/*.frag.spv
+shaders/*.spv
